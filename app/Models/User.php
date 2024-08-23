@@ -14,7 +14,6 @@ class User extends Authenticatable
 
     /**
      * The attributes that are mass assignable.
-     *
      * @var array<int, string>
      */
     protected $fillable = [
@@ -42,4 +41,13 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    /**
+     * Get the ratings created by the user.
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany 
+     */
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class);
+    }
 }
