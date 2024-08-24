@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Movie;
 use Illuminate\Http\Request;
 use App\Services\ApiResponseService;
+use App\Http\Resources\MovieResource;
 use App\Http\Requests\StoreMovieRequest;
 use App\Http\Requests\UpdateMovieRequest;
 
@@ -15,7 +16,15 @@ class MovieController extends Controller
      */
     public function index()
     {
-        $movies = Movie::paginate(2);
+        $movies = Movie::paginate(10);
+
+        // return ApiResponseService::paginated(MovieResource::collection($movies), 'Movies retrieved successfully', 200);
+
+        // Transform only the data in the paginated result
+        $movies->getCollection()->transform(function ($movie) {
+            return new MovieResource($movie);
+        });
+
         return ApiResponseService::paginated($movies, 'Movies retrieved successfully', 200);
     }
 
@@ -27,7 +36,9 @@ class MovieController extends Controller
         $validated = $request->validated();
 
         $movie = Movie::create($validated);
-        return ApiResponseService::success($movie, 'Movie created successfully', 201);
+
+        // Wrap the created movie in the resource
+        return ApiResponseService::success(new MovieResource($movie), 'Movie created successfully', 201);
     }
 
     /**
@@ -39,7 +50,7 @@ class MovieController extends Controller
         if (!$movie) {
             return ApiResponseService::error(null, 'Movie not found', 404);
         }
-        return ApiResponseService::success($movie, 'Movie retrieved successfully', 200);
+        return ApiResponseService::success(new MovieResource($movie), 'Movie retrieved successfully', 200);
     }
 
     /**
@@ -55,7 +66,7 @@ class MovieController extends Controller
         $validated = $request->validated();
 
         $movie->update($validated);
-        return ApiResponseService::success($movie, 'Movie updated successfully', 200);
+        return ApiResponseService::success(new MovieResource($movie), 'Movie updated successfully', 200);
     }
 
     /**
