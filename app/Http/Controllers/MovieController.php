@@ -8,9 +8,17 @@ use App\Services\ApiResponseService;
 use App\Http\Resources\MovieResource;
 use App\Http\Requests\StoreMovieRequest;
 use App\Http\Requests\UpdateMovieRequest;
+use App\Services\MovieService;
 
 class MovieController extends Controller
 {
+    protected $movieService;
+
+    public function __construct(MovieService $movieService)
+    {
+        $this->movieService = $movieService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -18,9 +26,6 @@ class MovieController extends Controller
     {
         $movies = Movie::paginate(10);
 
-        // return ApiResponseService::paginated(MovieResource::collection($movies), 'Movies retrieved successfully', 200);
-
-        // Transform only the data in the paginated result
         $movies->getCollection()->transform(function ($movie) {
             return new MovieResource($movie);
         });
@@ -35,10 +40,7 @@ class MovieController extends Controller
     {
         $validated = $request->validated();
 
-        $movie = Movie::create($validated);
-
-        // Wrap the created movie in the resource
-        return ApiResponseService::success(new MovieResource($movie), 'Movie created successfully', 201);
+        return $this->movieService->createMovie($validated);
     }
 
     /**
@@ -46,11 +48,7 @@ class MovieController extends Controller
      */
     public function show($id)
     {
-        $movie = Movie::find($id);
-        if (!$movie) {
-            return ApiResponseService::error(null, 'Movie not found', 404);
-        }
-        return ApiResponseService::success(new MovieResource($movie), 'Movie retrieved successfully', 200);
+        return $this->movieService->showMovie($id);
     }
 
     /**
@@ -58,15 +56,7 @@ class MovieController extends Controller
      */
     public function update(UpdateMovieRequest $request, $id)
     {
-        $movie = Movie::find($id);
-        if (!$movie) {
-            return ApiResponseService::error(null, 'Movie not found', 404);
-        }
-
-        $validated = $request->validated();
-
-        $movie->update($validated);
-        return ApiResponseService::success(new MovieResource($movie), 'Movie updated successfully', 200);
+        return $this->movieService->updateMovie($id, $request->all(), $request->rules());
     }
 
     /**
@@ -74,12 +64,6 @@ class MovieController extends Controller
      */
     public function destroy($id)
     {
-        $movie = Movie::find($id);
-        if (!$movie) {
-            return ApiResponseService::error(null, 'Movie not found', 404);
-        }
-
-        $movie->delete();
-        return ApiResponseService::success(null, 'Movie deleted successfully', 200);
+        return $this->movieService->deleteMovie($id);
     }
 }
