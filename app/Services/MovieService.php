@@ -6,29 +6,26 @@ use App\Models\Movie;
 use Illuminate\Http\Request;
 use App\Services\ApiResponseService;
 use App\Http\Resources\MovieResource;
+use App\Repositories\MovieRepository;
 use Illuminate\Support\Facades\Validator;
 
 class MovieService
 {
-    // Start building the query
-    // Filter by genre if provided
-    // Sort by release_year if provided
-    // Apply pagination to the query
-    // Return the paginated response with transformed data
+    protected $movieRepository;
 
+    public function __construct(MovieRepository $movieRepository)
+    {
+        $this->movieRepository = $movieRepository;
+    }
+
+    // Extract filters and sorting parameters from the request
+    // Get the paginated movies from the repository
     public function listMovies(Request $request)
     {
-        $query = Movie::query();
+        $filters = $request->only(['genre']);
+        $sort = $request->query('sort');
 
-        if ($request->has('genre') && !empty($request->query('genre'))) {
-            $query->where('genre', $request->query('genre'));
-        }
-
-        if ($request->has('sort') && in_array(strtolower($request->query('sort')), ['asc', 'desc'])) {
-            $query->orderBy('release_year', $request->query('sort'));
-        }
-
-        $paginator = $query->paginate(10);
+        $paginator = $this->movieRepository->getFilters($filters, $sort);
 
         return ApiResponseService::paginated($paginator, MovieResource::class, 'Movies retrieved successfully', 200);
     }
