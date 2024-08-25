@@ -12,8 +12,16 @@ use App\Services\MovieService;
 
 class MovieController extends Controller
 {
+    /**
+     * MovieService instance.
+     * @var MovieService
+     */    
     protected $movieService;
 
+    /**
+     * Inject MovieService dependency into the controller.
+     * @param MovieService $movieService
+     */
     public function __construct(MovieService $movieService)
     {
         $this->movieService = $movieService;
