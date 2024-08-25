@@ -49,12 +49,15 @@ class ApiResponseService
      * @param int $status
      * @return \Illuminate\Http\JsonResponse
      */
-    public static function paginated(LengthAwarePaginator $paginator, $message = '', $status)
+    public static function paginated(LengthAwarePaginator $paginator, $resourceClass, $message = '', $status)
     {
+        // Transform the items using the resource class
+        $transformedItems = $resourceClass::collection($paginator->items());
+
         return response()->json([
             'status' => 'success',
             'message' => trans($message),
-            'data' => $paginator->items(),
+            'data' => $transformedItems,
             'pagination' => [
                 'total' => $paginator->total(),
                 'count' => $paginator->count(),

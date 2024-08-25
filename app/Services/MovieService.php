@@ -3,12 +3,36 @@
 namespace App\Services;
 
 use App\Models\Movie;
+use Illuminate\Http\Request;
 use App\Services\ApiResponseService;
 use App\Http\Resources\MovieResource;
 use Illuminate\Support\Facades\Validator;
 
 class MovieService
 {
+    // Start building the query
+    // Filter by genre if provided
+    // Sort by release_year if provided
+    // Apply pagination to the query
+    // Return the paginated response with transformed data
+
+    public function listMovies(Request $request)
+    {
+        $query = Movie::query();
+
+        if ($request->has('genre') && !empty($request->query('genre'))) {
+            $query->where('genre', $request->query('genre'));
+        }
+
+        if ($request->has('sort') && in_array(strtolower($request->query('sort')), ['asc', 'desc'])) {
+            $query->orderBy('release_year', $request->query('sort'));
+        }
+
+        $paginator = $query->paginate(10);
+
+        return ApiResponseService::paginated($paginator, MovieResource::class, 'Movies retrieved successfully', 200);
+    }
+
     public function createMovie(array $data)
     {
         $movie = Movie::create($data);

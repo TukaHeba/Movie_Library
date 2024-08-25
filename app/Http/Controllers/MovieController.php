@@ -22,15 +22,9 @@ class MovieController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $movies = Movie::paginate(10);
-
-        $movies->getCollection()->transform(function ($movie) {
-            return new MovieResource($movie);
-        });
-
-        return ApiResponseService::paginated($movies, 'Movies retrieved successfully', 200);
+        return $this->movieService->listMovies($request);
     }
 
     /**
