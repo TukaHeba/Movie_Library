@@ -2,48 +2,65 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreRatingRequest;
+use App\Http\Requests\UpdateRatingRequest;
 use App\Models\Rating;
-use Illuminate\Http\Request;
+use App\Models\Movie;
+use App\Services\RatingService;
 
 class RatingController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * RatingService instance.
+     * @var RatingService
      */
-    public function index()
+    protected $ratingService;
+
+    /**
+     * Inject RatingService dependency into the controller.
+     * @param RatingService $movieService
+     */
+    public function __construct(RatingService $ratingService)
     {
-        //
+        $this->ratingService = $ratingService;
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a new rating in storage.
+     *
+     * @param \App\Http\Requests\StoreRatingRequest $request
+     * @param \App\Models\Movie $movie
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
+    public function store(StoreRatingRequest $request, Movie $movie)
     {
-        //
+        $validated = $request->validated();
+        return $this->ratingService->store($validated, $movie);
     }
 
     /**
-     * Display the specified resource.
+     * Update the specified rating.
+     *
+     * @param \App\Http\Requests\UpdateRatingRequest $request
+     * @param \App\Models\Movie $movie
+     * @param \App\Models\Rating $rating
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function show(Rating $rating)
+    public function update(UpdateRatingRequest $request, Movie $movie, Rating $rating)
     {
-        //
+        $validated = $request->validated();
+        return $this->ratingService->update($validated, $rating);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Remove the specified rating from storage.
+     *
+     * @param \App\Models\Movie $movie
+     * @param \App\Models\Rating $rating
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, Rating $rating)
+    public function destroy(Movie $movie, Rating $rating)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Rating $rating)
-    {
-        //
+        return $this->ratingService->delete($rating);
     }
 }

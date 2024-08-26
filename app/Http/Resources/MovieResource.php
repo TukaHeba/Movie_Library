@@ -14,19 +14,16 @@ class MovieResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        // Calculate the average rating
+        $ratingAvg = $this->ratings->isEmpty() ? 0 : round($this->ratings->avg('rating'), 1);
+
         return [
             'title' => $this->title,
             'director' => $this->director,
             'genre' => $this->genre,
             'release_year' => $this->release_year,
             'description' => $this->description,
-            'ratings' => $this->ratings->map(function ($rating) {
-                return [
-                    'rating' => $rating->rating,
-                    'review' => $rating->review,
-                    'user' => $rating->user->name,
-                ];
-            }),
+            'average_rating' => $ratingAvg,
         ];
     }
 }
